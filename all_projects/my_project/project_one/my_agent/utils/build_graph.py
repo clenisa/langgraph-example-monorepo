@@ -45,7 +45,9 @@ def should_continue(state):
         return "continue"
 
 
-system_prompt = """Be a helpful assistant"""
+system_prompt = """Be a helpful assistant. 
+
+IMPORTANT: Always maintain documentation up to date. When you make changes to code, workflows, dependencies, or functionality, you must update the relevant documentation files (README.md, code comments, docstrings) to reflect those changes. Documentation should accurately describe what the code does, what environment variables are needed, and how to use the system."""
 
 
 # Define the function that calls the model
