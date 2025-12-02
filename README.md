@@ -40,16 +40,20 @@ This monorepo contains **three LangGraph agents** deployed as separate graphs:
 - **Purpose**: A CI/CD orchestration agent that manages test execution workflows
 - **Capabilities**:
   - Plans and coordinates CI/CD workflows based on repository state
-  - Integrates with GitHub (stubbed - needs implementation)
-  - Manages test execution and result analysis
+  - **GitHub Integration**: Fetches commit/PR metadata, changed files, and posts PR comments
+  - **Playwright Test Runner**: Executes Playwright tests and captures results
+  - **Linear Integration**: Creates/updates Linear issues for test failures
   - Uses GPT-4o for planning decisions
-- **Workflow**: GitHub → Planner → Test Runner → Planner → End
-  - **GitHub Node**: Fetches repository information, commit SHA, PR number, and changed files
-  - **Planner Node**: Analyzes current state and decides next action (run tests, analyze failures, or summarize success)
-  - **Test Runner Node**: Triggers test execution and captures results (stubbed - needs implementation)
-  - The planner makes decisions based on test status and logs
+- **Workflow**: GitHub → Planner → [Test Runner | End] → Planner → End
+  - **GitHub Node**: Fetches repository information, commit SHA, PR number, and changed files from GitHub API
+  - **Planner Node**: Analyzes current state and decides next action:
+    - `run_tests`: Execute Playwright tests
+    - `analyze_failures`: Analyze failures and create Linear issues
+    - `summarize`: Generate summary and post PR comment
+  - **Test Runner Node**: Executes Playwright tests via subprocess and captures stdout/stderr
+  - The planner makes decisions based on test status and logs, and handles Linear integration and PR comments
 
-**Note**: The `ci_boss` agent currently has stub implementations for GitHub integration and test runner. These need to be implemented with actual GitHub API calls and test execution logic for production use.
+**See**: [CI Boss Documentation](all_projects/my_project/project_one/my_agent/ci_boss.md) for detailed configuration and usage.
 
 ## Current Workflow State
 
@@ -88,7 +92,12 @@ The CI/CD orchestration agent follows this workflow:
 5. **Loop Back**: Returns to planner for next decision
 6. **Termination**: Planner decides to end workflow
 
-**Current State**: Core workflow structure is complete, but GitHub integration and test runner are stubbed. The planner logic is functional and can make decisions based on state, but requires actual GitHub API calls and test execution infrastructure to be fully operational.
+**Current State**: Fully functional with complete integrations:
+- ✅ GitHub API integration for fetching commit/PR metadata and posting comments
+- ✅ Playwright test execution via subprocess
+- ✅ Linear issue creation and updates for test failures
+- ✅ Conditional graph routing based on planner decisions
+- ✅ Comprehensive error handling and graceful degradation when env vars are missing
 
 # Environment Setup
 
@@ -113,6 +122,14 @@ Then set the following environment variables:
 
 ### For `ci_boss`:
 - `OPENAI_API_KEY` - Required for GPT-4o planning model
+- `GITHUB_TOKEN` - GitHub Personal Access Token with `repo` scope (optional, for GitHub integration)
+- `PLAYWRIGHT_COMMAND` - Command to run Playwright tests (optional, default: `"npx playwright test"`)
+- `PLAYWRIGHT_WORKING_DIR` - Working directory for test execution (optional, default: repo root)
+- `LINEAR_API_KEY` - Linear personal API key (optional, for Linear integration)
+- `LINEAR_TEAM_ID` - Linear team ID where issues are created (optional, for Linear integration)
+- `LINEAR_LABEL_ID_BUG` - Linear label ID for bug issues (optional)
+- `LINEAR_LABEL_ID_TEST_FAILURE` - Linear label ID for test failure issues (optional)
+- `LINEAR_LABEL_ID_FEATURE` - Linear label ID for feature issues (optional)
 
 ### Optional:
 - `LANGCHAIN_API_KEY` - Required if using LangChain tracing/monitoring features
