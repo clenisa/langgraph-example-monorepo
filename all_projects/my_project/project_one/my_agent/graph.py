@@ -27,6 +27,8 @@ def planner_node(state: CIState) -> CIState:
     prompt = f"""
 You are a CI boss agent.
 
+IMPORTANT: Always maintain documentation up to date. When you make changes to code, workflows, dependencies, or functionality, you must update the relevant documentation files (README.md, code comments, docstrings) to reflect those changes. Documentation should accurately describe what the code does, what environment variables are needed, and how to use the system.
+
 Repo: {state.get('repo', 'N/A')}
 Commit: {state.get('commit_sha', 'N/A')}
 PR: {state.get('pr_number', 'N/A')}
